@@ -72,6 +72,6 @@ procedure CreateReader(Str: string);
     except
     status := '';
     result := true;
-    end;w
+    end;
 end;
 ```
