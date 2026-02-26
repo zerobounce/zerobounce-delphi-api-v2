@@ -6,34 +6,16 @@ program ValidateEmailExample;
 
 uses
   System.SysUtils,
-  System.StrUtils,
   System.Classes,
   System.JSON,
   IdHTTP,
-  IdSSLOpenSSL;
+  IdSSLOpenSSL,
+  ZeroBounceValidate in 'ZeroBounceValidate.pas';
 
 var
   ApiKey: string;
   EmailToValidate: string;
   Status: string;
-
-function UrlEncode(const DecodedStr: string; Pluses: Boolean): string;
-var
-  I: Integer;
-  C: Char;
-begin
-  Result := '';
-  for I := 1 to Length(DecodedStr) do
-  begin
-    C := DecodedStr[I];
-    if CharInSet(C, ['0'..'9', 'a'..'z', 'A'..'Z']) then
-      Result := Result + C
-    else if C = ' ' then
-      Result := Result + IfThen(Pluses, '+', '%20')
-    else
-      Result := Result + '%' + IntToHex(Ord(C), 2);
-  end;
-end;
 
 function ValidateEmail(const ApiKey, EmailAddress: string; var Status: string): Boolean;
 var
@@ -49,45 +31,48 @@ begin
   SSLHandler := nil;
   JsonResponse := nil;
   try
-    SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-    SSLHandler.SSLOptions.Method := sslvTLSv1_2;
-    SSLHandler.SSLOptions.SSLVersions := [sslvTLSv1_2];
-
-    HTTP := TIdHTTP.Create(nil);
-    HTTP.IOHandler := SSLHandler;
-    HTTP.ReadTimeout := 15000;
-    HTTP.Request.ContentType := 'application/json';
-
-    Url := 'https://api.zerobounce.net/v2/validate?api_key=' + ApiKey +
-           '&email=' + UrlEncode(EmailAddress, False) + '&ip_address=';
-    ResponseBody := HTTP.Get(Url);
-
-    JsonResponse := TJSONObject.ParseJSONValue(ResponseBody) as TJSONObject;
-    if JsonResponse = nil then
-      Exit;
-
     try
-      StatusVal := JsonResponse.GetValue('status');
-      if (StatusVal <> nil) and (StatusVal is TJSONString) then
-        Status := TJSONString(StatusVal).Value;
-      SubStatusVal := JsonResponse.GetValue('sub_status');
-      if (SubStatusVal <> nil) and (SubStatusVal is TJSONString) and (TJSONString(SubStatusVal).Value <> '') then
-        Status := Status + ', ' + TJSONString(SubStatusVal).Value;
-      Result := (Pos('Unknown', Status) = 0) and (Pos('Invalid', Status) = 0);
-    finally
-      JsonResponse.Free;
+      SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSLHandler.SSLOptions.Method := sslvTLSv1_2;
+      SSLHandler.SSLOptions.SSLVersions := [sslvTLSv1_2];
+
+      HTTP := TIdHTTP.Create(nil);
+      HTTP.IOHandler := SSLHandler;
+      HTTP.ReadTimeout := 15000;
+      HTTP.Request.ContentType := 'application/json';
+
+      Url := 'https://api.zerobounce.net/v2/validate?api_key=' + ApiKey +
+             '&email=' + UrlEncode(EmailAddress, False) + '&ip_address=';
+      ResponseBody := HTTP.Get(Url);
+
+      JsonResponse := TJSONObject.ParseJSONValue(ResponseBody) as TJSONObject;
+      if JsonResponse = nil then
+        Exit;
+
+      try
+        StatusVal := JsonResponse.GetValue('status');
+        if (StatusVal <> nil) and (StatusVal is TJSONString) then
+          Status := TJSONString(StatusVal).Value;
+        SubStatusVal := JsonResponse.GetValue('sub_status');
+        if (SubStatusVal <> nil) and (SubStatusVal is TJSONString) and (TJSONString(SubStatusVal).Value <> '') then
+          Status := Status + ', ' + TJSONString(SubStatusVal).Value;
+        Result := IsValidStatus(Status);
+      finally
+        JsonResponse.Free;
+      end;
+    except
+      on E: Exception do
+      begin
+        Status := 'Error: ' + E.Message;
+        Result := False;
+      end;
     end;
-  except
-    on E: Exception do
-    begin
-      Status := 'Error: ' + E.Message;
-      Result := False;
-    end;
+  finally
+    if Assigned(HTTP) then
+      HTTP.Free;
+    if Assigned(SSLHandler) then
+      SSLHandler.Free;
   end;
-  if Assigned(HTTP) then
-    HTTP.Free;
-  if Assigned(SSLHandler) then
-    SSLHandler.Free;
 end;
 
 begin

@@ -1,6 +1,6 @@
 # zerobounce-delphi-api-v2
 
-Delphi console example for validating a single email with the [Zero Bounce API v2](https://www.zerobounce.net/docs/).
+**v2.0.0** — Delphi console example for validating a single email with the [Zero Bounce API v2](https://www.zerobounce.net/docs/).
 
 ## Runnable example
 
@@ -32,6 +32,27 @@ ValidateEmailExample.exe user@example.com
 ```
 
 Output: `Valid: <status>` or `Invalid: <status>` (and optional `sub_status`).
+
+## Unit tests
+
+Build and run **`TestValidateEmail.dpr`** (no Indy or API key required). It tests:
+
+- **UrlEncode** — empty, alphanumeric, `@`, full email, spaces, dots, hyphens
+- **IsValidStatus** — `valid` / `invalid` / `unknown` (case-insensitive), catch-all, spamtrap, status with sub_status
+
+```text
+TestValidateEmail.exe
+```
+
+Result: `N passed, 0 failed` with exit code 0 on success.
+
+## Project layout
+
+| File | Purpose |
+|------|--------|
+| `ValidateEmailExample.dpr` | Main console app (API validation) |
+| `ZeroBounceValidate.pas` | Shared helpers: `UrlEncode`, `IsValidStatus` |
+| `TestValidateEmail.dpr` | Console test runner for the helpers |
 
 ---
 
