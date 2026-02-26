@@ -1,77 +1,38 @@
 # zerobounce-delphi-api-v2
-Delphi wrapper class example for the ZeroBounce API v2
 
+Delphi console example for validating a single email with the [Zero Bounce API v2](https://www.zerobounce.net/docs/).
 
-```pascal
-Function ValidateEmail(emailaddress : string;var status : string) : boolean;
-var
-stir : string;
-url,apiKey : string;
+## Runnable example
 
-Reader: TJsonTextReader;
-procedure CreateReader(Str: string);
-    begin
-    if Reader <> nil then
-        Reader.Free;
-    if Sr <> nil then
-        Sr.Free;
-    Sr := TStringReader.Create(Str);
-    Reader := TJsonTextReader.Create(Sr);
-    end;
+Open and build **`ValidateEmailExample.dpr`** in the root of this repo. It uses Indy (IdHTTP, IdSSLOpenSSL) and `System.JSON` — no forms, no VCL UI.
 
-    function UrlEncode(const DecodedStr: String; Pluses: Boolean): String;
-        var
-        I: Integer;
-        begin
-        Result := '';
-        if Length(DecodedStr) > 0 then
-        for I := 1 to Length(DecodedStr) do
-        begin
-        if not (DecodedStr[I] in ['0'..'9', 'a'..'z',
-                                        'A'..'Z', ' ']) then
-            Result := Result + '%' + IntToHex(Ord(DecodedStr[I]), 2)
-        else if not (DecodedStr[I] = ' ') then
-            Result := Result + DecodedStr[I]
-        else
-            begin
-            if not Pluses then
-                Result := Result + '%20'
-            else
-                Result := Result + '+';
-            end;
-        end;
-    end;
+### Requirements
 
-    begin
-    try
-    //2 DLLS are needed for the SSL to run (they need to be in one directory with the EXE)
-    //openssl-1.0.2o-i386-win32.zip is the current one
-    //Download from https://indy.fulgan.com/SSL/
-    apiKey := 'yourZEROBOUNCEapikeyXXXX';
+- Delphi (XE6 or later with `System.JSON`) or Free Pascal with Indy
+- [Indy](https://www.indyproject.org/) (IdHTTP, IdSSLOpenSSL) — included in recent Delphi installs
+- OpenSSL DLLs next to the executable for HTTPS, e.g. from [Indy OpenSSL binaries](https://indy.fulgan.com/SSL/)
 
-    url :='https://api.zerobounce.net/v2/validate?api_key='+apiKey+'&email='+UrlEncode(emailaddress,false)+'&ip_address=';
-    form1.IdHTTP1.ReadTimeout := 15000;
-    form1.idhttp1.IOHandler := form1.IdSSLIOHandlerSocketOpenSSL1;
-    form1.IdSSLIOHandlerSocketOpenSSL1.SSLOptions.Method := sslvTLSv1_2;
-    form1.IdSSLIOHandlerSocketOpenSSL1.SSLOptions.SSLVersions := [sslvTLSv1_2];
-    stir := form1.IdHTTP1.Get(url);
-    CreateReader(stir);
-    status := '';
-    while Reader.read do
-    case Reader.TokenType of
-        TJsonToken.string:
-        begin
-            if reader.path='status' then status := 
-    status+reader.value.tostring;
-            if reader.path='sub_status' then
-            if reader.value.tostring<>'' then status := status+', 
-    '+reader.value.tostring;
-        end;
-    end;
-    result := (pos('Unknown',status)=0) and (pos('Invalid',status)=0);
-    except
-    status := '';
-    result := true;
-    end;
-end;
+### Run
+
+```text
+ValidateEmailExample.exe <email_to_validate> [api_key]
 ```
+
+If `api_key` is omitted, the program uses the `ZEROBOUNCE_API_KEY` environment variable.
+
+**Examples:**
+
+```bash
+# API key as second argument
+ValidateEmailExample.exe user@example.com your_api_key_here
+
+# API key from environment
+set ZEROBOUNCE_API_KEY=your_api_key_here
+ValidateEmailExample.exe user@example.com
+```
+
+Output: `Valid: <status>` or `Invalid: <status>` (and optional `sub_status`).
+
+---
+
+For the full Zero Bounce SDK (all endpoints, batch, bulk file, scoring, find email, domain search), use the [zero-bounce-pascal](https://github.com/zerobounce/zero-bounce-pascal) repository.
