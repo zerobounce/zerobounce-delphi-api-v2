@@ -1,59 +1,24 @@
-# zerobounce-delphi-api-v2
+# zerobounce-delphi-api-v2 — **merged into zero-bounce-pascal**
 
-**v2.0.0** — Delphi console example for validating a single email with the [Zero Bounce API v2](https://www.zerobounce.net/docs/).
+This repository has been **merged into** [**zero-bounce-pascal**](https://github.com/zerobounce/zero-bounce-pascal). It is **no longer maintained** here.
 
-## Runnable example
+## Where to find the code
 
-Open and build **`ValidateEmailExample.dpr`** in the root of this repo. It uses Indy (IdHTTP, IdSSLOpenSSL) and `System.JSON` — no forms, no VCL UI.
+All content from this repo lives under:
 
-### Requirements
+**https://github.com/zerobounce/zero-bounce-pascal/tree/main/examples/delphi-api-v2**
 
-- Delphi (XE6 or later with `System.JSON`) or Free Pascal with Indy
-- [Indy](https://www.indyproject.org/) (IdHTTP, IdSSLOpenSSL) — included in recent Delphi installs
-- OpenSSL DLLs next to the executable for HTTPS, e.g. from [Indy OpenSSL binaries](https://indy.fulgan.com/SSL/)
+There you will find:
 
-### Run
+- **ZeroBounceValidate.pas** — `UrlEncode` and `IsValidStatus` helpers
+- **ValidateEmailExample.dpr** — Console example for single-email validation (Indy + System.JSON)
+- **TestValidateEmail.dpr** — Unit test runner for the helpers
+- **run-tests.bat** / **run-tests.sh** — Test scripts
 
-```text
-ValidateEmailExample.exe <email_to_validate> [api_key]
-```
+## Full SDK
 
-If `api_key` is omitted, the program uses the `ZEROBOUNCE_API_KEY` environment variable.
-
-**Examples:**
-
-```bash
-# API key as second argument
-ValidateEmailExample.exe user@example.com your_api_key_here
-
-# API key from environment
-set ZEROBOUNCE_API_KEY=your_api_key_here
-ValidateEmailExample.exe user@example.com
-```
-
-Output: `Valid: <status>` or `Invalid: <status>` (and optional `sub_status`).
-
-## Unit tests
-
-Build and run **`TestValidateEmail.dpr`** (no Indy or API key required). It tests:
-
-- **UrlEncode** — empty, alphanumeric, `@`, full email, spaces, dots, hyphens
-- **IsValidStatus** — `valid` / `invalid` / `unknown` (case-insensitive), catch-all, spamtrap, status with sub_status
-
-```text
-TestValidateEmail.exe
-```
-
-Result: `N passed, 0 failed` with exit code 0 on success.
-
-## Project layout
-
-| File | Purpose |
-|------|--------|
-| `ValidateEmailExample.dpr` | Main console app (API validation) |
-| `ZeroBounceValidate.pas` | Shared helpers: `UrlEncode`, `IsValidStatus` |
-| `TestValidateEmail.dpr` | Console test runner for the helpers |
+For the full Zero Bounce Pascal SDK (all endpoints, batch, bulk file, scoring, find email, domain search), use the [zero-bounce-pascal](https://github.com/zerobounce/zero-bounce-pascal) repository.
 
 ---
 
-For the full Zero Bounce SDK (all endpoints, batch, bulk file, scoring, find email, domain search), use the [zero-bounce-pascal](https://github.com/zerobounce/zero-bounce-pascal) repository.
+**v2.0.0** was the last release from this repo (2025-02-26). Further updates will be made only in zero-bounce-pascal.

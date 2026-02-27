@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.0.0] - 2025-02-26
 
+**This repository has been merged into [zero-bounce-pascal](https://github.com/zerobounce/zero-bounce-pascal).** See `examples/delphi-api-v2/` there. This repo is no longer maintained.
+
 ### Added
 
 - **ZeroBounceValidate.pas** — Shared unit with `UrlEncode` and `IsValidStatus` for reuse and testing.
